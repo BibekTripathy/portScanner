@@ -1,0 +1,22 @@
+# Critical Ports Configuration
+# Format:
+# port_number: "Service Name"
+
+22: "SSH"
+80: "HTTP"
+443: "HTTPS"
+3306: "MySQL"
+5432: "PostgreSQL"
+27017: "MongoDB"
+3389: "RDP"
+21: "FTP"
+25: "SMTP"
+53: "DNS"
+137: "NetBIOS"
+139: "SMB"
+445: "SMB"
+1433: "MSSQL"
+1521: "Oracle"
+6379: "Redis"
+8080: "HTTP-Alt"
+9000: "Portainer/SonarQube"
