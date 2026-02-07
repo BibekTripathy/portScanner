@@ -9,6 +9,7 @@ from rich.table import Table
 from modules.scanner import scan_listening_ports
 from modules.mapper import processes_map
 from modules.comparator import load_scan_from_file, compare_scans
+from modules.monitor import start_monitor
 from utils.logger import logger
 
 console = Console()
@@ -176,7 +177,8 @@ def print_menu():
     console.print("1. Scan Ports (Basic)")
     console.print("2. Scan Ports (Detailed)")
     console.print("3. Export Last Scan to JSON")
-    console.print("4. Exit")
+    console.print("4. Watch Mode (Live Monitor)")
+    console.print("5. Exit")
 
 
 def interactive_mode():
@@ -185,7 +187,7 @@ def interactive_mode():
     while True:
         print_menu()
         choice = IntPrompt.ask(
-            "Select an option", choices=["1", "2", "3", "4"], show_choices=False
+            "Select an option", choices=["1", "2", "3", "4", "5"], show_choices=False
         )
 
         if choice == 1:
@@ -195,6 +197,8 @@ def interactive_mode():
         elif choice == 3:
             export_to_json(last_scan_results)
         elif choice == 4:
+            start_monitor(console=console)
+        elif choice == 5:
             console.print("[blue]Goodbye![/blue]")
             sys.exit(0)
 
@@ -222,10 +226,19 @@ def main():
     parser.add_argument(
         "-c", "--compare", help="Compare current scan with a baseline JSON file"
     )
+    parser.add_argument(
+        "-w", "--watch", action="store_true", help="Run in live monitor mode"
+    )
+    parser.add_argument(
+        "-i", "--interval", type=int, default=2, help="Refresh interval for watch mode (seconds)"
+    )
 
     args = parser.parse_args()
 
-    if args.compare:
+    if args.watch:
+        start_monitor(interval=args.interval, console=console)
+
+    elif args.compare:
         baseline = load_scan_from_file(args.compare)
         if baseline is None:
             sys.exit(1)
