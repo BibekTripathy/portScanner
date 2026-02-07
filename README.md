@@ -10,12 +10,28 @@ A robust Command Line Interface (CLI) tool for scanning, mapping, and monitoring
 - **Monitoring:** Real-time monitoring capabilities (via `modules/monitor`).
 - **Rich Interface:** User-friendly CLI output using the `rich` library.
 
+## Installation
+
+Install all required dependencies using pip:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Usage
 
-Run the main script to start the interactive CLI:
+### Advanced CLI
+Run the main script to start the interactive CLI with full features:
 
 ```bash
 python portScanner.py
+```
+
+### Simple Mode
+For a quick, lightweight scan, you can run:
+
+```bash
+python portScanner-simple.py
 ```
 
 ## Future Roadmap
@@ -23,5 +39,4 @@ python portScanner.py
 - **App Interface:** I am actively planning to develop a Graphical User Interface (GUI) application in the future to provide an even more accessible experience for visualizing network activity.
 
 ## Version
-
 1.0.0 (CLI Only)
