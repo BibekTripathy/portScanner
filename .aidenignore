@@ -212,5 +212,3 @@ __pycache__/
 *.json
 tests/
 .aider*
-.agent.md
-.aidenignore
