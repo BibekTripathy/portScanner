@@ -2,3 +2,5 @@ rich
 psutil
 PyYAML
 flask
+fastapi
+uvicorn
