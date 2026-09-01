@@ -214,3 +214,9 @@ tests/
 .aider*
 .agent.md
 .aidenignore
+
+# Node / React
+node_modules/
+npm-debug.log
+yarn-error.log
+.DS_Store
