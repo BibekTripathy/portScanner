@@ -6,12 +6,13 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [error, setError] = useState('');
+  const [lastScanned, setLastScanned] = useState(null);
   
   // Auto-refresh interval (0 means off, otherwise in seconds)
   const [refreshInterval, setRefreshInterval] = useState(0);
 
   // Sorting state
-  const [sortConfig, setSortConfig] = useState({ key: 'port', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   // Initial dark mode setup
   useEffect(() => {
@@ -38,6 +39,7 @@ function App() {
       }
       const result = await response.json();
       setData(result.data || []);
+      setLastScanned(new Date());
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,11 +67,15 @@ function App() {
 
   // Sorting logic
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    if (sortConfig.key === key) {
+      if (sortConfig.direction === 'asc') {
+        setSortConfig({ key, direction: 'desc' });
+      } else if (sortConfig.direction === 'desc') {
+        setSortConfig({ key: null, direction: 'asc' }); // Default state
+      }
+    } else {
+      setSortConfig({ key, direction: 'asc' });
     }
-    setSortConfig({ key, direction });
   };
 
   const sortedData = useMemo(() => {
@@ -210,7 +216,7 @@ function App() {
           {sortedData.length > 0 && (
             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 flex justify-between">
               <span>Found {sortedData.length} listening ports</span>
-              <span>Last scanned: {new Date().toLocaleTimeString()}</span>
+              <span>Last scanned: {lastScanned ? lastScanned.toLocaleTimeString() : '...'}</span>
             </div>
           )}
         </div>
