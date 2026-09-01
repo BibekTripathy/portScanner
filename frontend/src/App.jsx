@@ -193,20 +193,16 @@ function App() {
                 ) : (
                   sortedData.map((port, idx) => (
                     <tr key={`${port.port}-${port.protocol}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/25 transition-colors">
-                      <td className="p-4 text-cyan-600 dark:text-cyan-400">{port.protocol}</td>
-                      <td className="p-4 font-medium text-slate-700 dark:text-slate-200">{port.port}</td>
-                      <td className="p-4 text-emerald-600 dark:text-emerald-400">{port.service_guess}</td>
+                      <td className="p-4">{port.protocol}</td>
+                      <td className="p-4 font-medium">{port.port}</td>
+                      <td className="p-4">{port.service_guess}</td>
                       <td className="p-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          port.scope === 'localhost' 
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                            : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-                        }`}>
+                        <span className="px-2 py-1 rounded-full text-xs font-medium border border-slate-300 dark:border-slate-600">
                           {port.scope}
                         </span>
                       </td>
-                      <td className="p-4 text-fuchsia-600 dark:text-fuchsia-400">{port.process_name || 'Unknown'}</td>
-                      <td className="p-4 text-amber-600 dark:text-amber-400">{port.process_user || port.username || 'Unknown'}</td>
+                      <td className="p-4">{port.process_name || 'Unknown'}</td>
+                      <td className="p-4">{port.process_user || port.username || 'Unknown'}</td>
                     </tr>
                   ))
                 )}
