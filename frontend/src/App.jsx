@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react';
-import { RefreshCw, Sun, Moon, ShieldAlert, Monitor } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { RefreshCw, Sun, Moon, ShieldAlert, Monitor, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [error, setError] = useState('');
+  
+  // Auto-refresh interval (0 means off, otherwise in seconds)
+  const [refreshInterval, setRefreshInterval] = useState(0);
 
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState({ key: 'port', direction: 'asc' });
+
+  // Initial dark mode setup
   useEffect(() => {
-    // Check system preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setDarkMode(true);
     }
@@ -39,23 +45,91 @@ function App() {
     }
   };
 
+  // Initial fetch
   useEffect(() => {
     fetchScanData();
   }, []);
 
+  // Auto-refresh logic
+  useEffect(() => {
+    let intervalId;
+    if (refreshInterval > 0) {
+      intervalId = setInterval(() => {
+        fetchScanData();
+      }, refreshInterval * 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [refreshInterval]);
+
+  // Sorting logic
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedData = useMemo(() => {
+    let sortableItems = [...data];
+    if (sortConfig.key) {
+      sortableItems.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Normalization for specific keys
+        if (sortConfig.key === 'process_user') {
+          aValue = aValue || a.username || 'Unknown';
+          bValue = bValue || b.username || 'Unknown';
+        }
+        if (sortConfig.key === 'process_name') {
+          aValue = aValue || 'Unknown';
+          bValue = bValue || 'Unknown';
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [data, sortConfig]);
+
+  const SortIcon = ({ columnKey }) => {
+    if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="text-slate-400" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-indigo-500" /> : <ArrowDown size={14} className="text-indigo-500" />;
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-300 transition-colors duration-200">
       <div className="max-w-6xl mx-auto p-6">
-        <header className="flex justify-between items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
           <div className="flex items-center gap-3">
             <Monitor className="text-indigo-500 dark:text-indigo-400" size={28} />
             <h1 className="text-2xl font-medium tracking-tight">Port Scanner</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm">
+              <label htmlFor="autoRefresh" className="font-medium">Auto-refresh:</label>
+              <select
+                id="autoRefresh"
+                value={refreshInterval}
+                onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                className="bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer"
+              >
+                <option value={0}>Off</option>
+                <option value={5}>Every 5s</option>
+                <option value={10}>Every 10s</option>
+                <option value={30}>Every 30s</option>
+              </select>
+            </div>
+
             <button 
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400"
+              className="p-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors text-slate-500 dark:text-slate-400"
               title="Toggle Light/Dark Mode"
             >
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
@@ -63,7 +137,7 @@ function App() {
             <button 
               onClick={fetchScanData}
               disabled={loading}
-              className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-70 font-medium"
+              className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-70 shadow-sm font-medium"
             >
               <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Scanning...' : 'Scan Now'}
@@ -80,32 +154,42 @@ function App() {
 
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
-                <tr className="bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 text-sm">
-                  <th className="p-4 font-medium">Protocol</th>
-                  <th className="p-4 font-medium">Port</th>
-                  <th className="p-4 font-medium">Service</th>
-                  <th className="p-4 font-medium">IP</th>
-                  <th className="p-4 font-medium">Scope</th>
-                  <th className="p-4 font-medium">Process</th>
-                  <th className="p-4 font-medium">User</th>
+                <tr className="bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 text-sm select-none">
+                  <th className="p-4 font-medium cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors group" onClick={() => handleSort('protocol')}>
+                    <div className="flex items-center justify-between">Protocol <SortIcon columnKey="protocol" /></div>
+                  </th>
+                  <th className="p-4 font-medium cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors group" onClick={() => handleSort('port')}>
+                    <div className="flex items-center justify-between">Port <SortIcon columnKey="port" /></div>
+                  </th>
+                  <th className="p-4 font-medium cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors group" onClick={() => handleSort('service_guess')}>
+                    <div className="flex items-center justify-between">Service <SortIcon columnKey="service_guess" /></div>
+                  </th>
+                  <th className="p-4 font-medium cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors group" onClick={() => handleSort('scope')}>
+                    <div className="flex items-center justify-between">Scope <SortIcon columnKey="scope" /></div>
+                  </th>
+                  <th className="p-4 font-medium cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors group" onClick={() => handleSort('process_name')}>
+                    <div className="flex items-center justify-between">Process <SortIcon columnKey="process_name" /></div>
+                  </th>
+                  <th className="p-4 font-medium cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors group" onClick={() => handleSort('process_user')}>
+                    <div className="flex items-center justify-between">User <SortIcon columnKey="process_user" /></div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                {data.length === 0 && !loading ? (
+                {sortedData.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    <td colSpan="6" className="p-8 text-center text-slate-500 dark:text-slate-400">
                       No listening ports found
                     </td>
                   </tr>
                 ) : (
-                  data.map((port, idx) => (
-                    <tr key={`${port.port}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/25 transition-colors">
+                  sortedData.map((port, idx) => (
+                    <tr key={`${port.port}-${port.protocol}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/25 transition-colors">
                       <td className="p-4 text-cyan-600 dark:text-cyan-400">{port.protocol}</td>
                       <td className="p-4 font-medium text-slate-700 dark:text-slate-200">{port.port}</td>
                       <td className="p-4 text-emerald-600 dark:text-emerald-400">{port.service_guess}</td>
-                      <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">{port.ip}</td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           port.scope === 'localhost' 
@@ -123,9 +207,9 @@ function App() {
               </tbody>
             </table>
           </div>
-          {data.length > 0 && (
+          {sortedData.length > 0 && (
             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 flex justify-between">
-              <span>Found {data.length} listening ports</span>
+              <span>Found {sortedData.length} listening ports</span>
               <span>Last scanned: {new Date().toLocaleTimeString()}</span>
             </div>
           )}
