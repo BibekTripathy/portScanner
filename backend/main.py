@@ -196,8 +196,16 @@ def get_docker_logs(container_id: str, tail: int = 100, current_user: models.Use
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
 # --- FRONTEND (STATIC FILES) ---
-frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+import sys
+if getattr(sys, 'frozen', False):
+    base_dir = sys._MEIPASS
+    frontend_dist = os.path.join(base_dir, "frontend", "dist")
+else:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    frontend_dist = os.path.join(base_dir, "..", "frontend", "dist")
+
 if os.path.exists(frontend_dist):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
     

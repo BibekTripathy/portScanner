@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build and Release Linux Binary
 
 on:
   push:
@@ -10,56 +10,46 @@ permissions:
 
 jobs:
   build:
-    name: Build binaries
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            artifact_name: portScanner
-            simple_artifact_name: portScanner-simple
-            asset_name: portScanner-linux
-            simple_asset_name: portScanner-simple-linux
-          - os: windows-latest
-            artifact_name: portScanner.exe
-            simple_artifact_name: portScanner-simple.exe
-            asset_name: portScanner-windows.exe
-            simple_asset_name: portScanner-simple-windows.exe
+    name: Build Linux Binary
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
           pip install pyinstaller
 
-      - name: Build portScanner (Main)
+      - name: Build portScanner Binary
         run: |
-          pyinstaller --onefile --name portScanner portScanner.py
+          # Add frontend build output and config files to the PyInstaller bundle
+          pyinstaller --onefile --name portScanner-linux \
+            --add-data "frontend/dist:frontend/dist" \
+            --add-data "backend/config/criticalPorts.yaml:backend/config" \
+            backend/main.py
 
-      - name: Build portScanner-simple (Simple)
-        run: |
-          pyinstaller --onefile --name portScanner-simple portScanner-simple.py
-
-      - name: Rename artifacts (Bash)
-        shell: bash
-        run: |
-          mv dist/${{ matrix.artifact_name }} dist/${{ matrix.asset_name }}
-          mv dist/${{ matrix.simple_artifact_name }} dist/${{ matrix.simple_asset_name }}
-
-      - name: Upload Release Assets
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            dist/${{ matrix.asset_name }}
-            dist/${{ matrix.simple_asset_name }}
+            dist/portScanner-linux
