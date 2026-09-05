@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { RefreshCw, Sun, Moon, ShieldAlert, Monitor, ArrowUpDown, ArrowUp, ArrowDown, LogOut } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { RefreshCw, Sun, Moon, ShieldAlert, Monitor, ArrowUpDown, ArrowUp, ArrowDown, LogOut, ArrowLeft } from 'lucide-react';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -129,9 +129,14 @@ function Dashboard() {
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-300 transition-colors duration-200">
       <div className="max-w-6xl mx-auto p-6">
         <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
-          <div className="flex items-center gap-3">
-            <Monitor className="text-indigo-500 dark:text-indigo-400" size={28} />
-            <h1 className="text-2xl font-medium tracking-tight">Port Scanner</h1>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors hidden sm:block">
+              <ArrowLeft size={20} className="text-slate-500 dark:text-slate-400" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <Monitor className="text-indigo-500 dark:text-indigo-400" size={28} />
+              <h1 className="text-2xl font-medium tracking-tight">Port Scanner</h1>
+            </div>
           </div>
           
           <div className="flex items-center gap-4 flex-wrap">
