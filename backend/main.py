@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import jwt
 
@@ -9,6 +10,8 @@ from modules.scanner import scan_listening_ports
 from modules.mapper import processes_map
 from database import engine, Base, get_db
 from modules.system_utils import get_cpu_info, get_memory_info, get_disk_info, get_network_info, get_uptime
+from modules.process_service import process_service
+from modules.docker_service import docker_service
 import models
 import auth
 import uvicorn
@@ -137,6 +140,55 @@ def get_system_metrics(current_user: models.User = Depends(get_current_user)):
             "uptime": get_uptime()
         }
         return {"status": "success", "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/processes")
+def get_processes(limit: int = 50, current_user: models.User = Depends(get_current_user)):
+    try:
+        data = process_service.list_processes(limit)
+        return {"status": "success", "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/processes/{pid}/kill")
+def kill_proc(pid: int, current_user: models.User = Depends(get_current_user)):
+    try:
+        success, msg = process_service.kill_process(pid)
+        if success:
+            return {"status": "success", "message": msg}
+        else:
+            raise HTTPException(status_code=500, detail=msg)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/docker/containers")
+def get_docker_containers(current_user: models.User = Depends(get_current_user)):
+    try:
+        data = docker_service.list_containers()
+        return {"status": "success", "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class DockerActionRequest(BaseModel):
+    action: str
+
+@app.post("/api/docker/containers/{container_id}/control")
+def control_docker_container(container_id: str, req: DockerActionRequest, current_user: models.User = Depends(get_current_user)):
+    try:
+        success, msg = docker_service.control_container(container_id, req.action)
+        if success:
+            return {"status": "success", "message": msg}
+        else:
+            raise HTTPException(status_code=500, detail=msg)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/docker/containers/{container_id}/logs")
+def get_docker_logs(container_id: str, tail: int = 100, current_user: models.User = Depends(get_current_user)):
+    try:
+        logs = docker_service.get_container_logs(container_id, tail=tail)
+        return {"status": "success", "logs": logs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
