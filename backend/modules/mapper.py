@@ -3,7 +3,16 @@ import yaml
 from pathlib import Path
 from utils.logger import logger
 
-CONFIG_PATH = Path("config/criticalPorts.yaml")
+import sys
+import os
+
+if getattr(sys, 'frozen', False):
+    base_dir = sys._MEIPASS
+    CONFIG_PATH = Path(os.path.join(base_dir, "backend", "config", "criticalPorts.yaml"))
+else:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    CONFIG_PATH = Path(os.path.join(base_dir, "config", "criticalPorts.yaml"))
+
 
 
 def load_critical_ports():
