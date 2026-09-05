@@ -1,22 +1,17 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import SystemMetrics from '../components/SystemMetrics';
-import ProcessList from '../components/ProcessList';
-import DockerStatus from '../components/DockerStatus';
-import { ArrowLeft } from 'lucide-react';
-import '../index.css';
-import { useTheme } from '../hooks/useTheme'; // ensure styles are applied if needed
+import re
 
-function Stats() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [pollingInterval, setPollingInterval] = useState(3000);
-  const { darkMode, toggleTheme } = useTheme();
+with open('frontend/src/pages/Stats.jsx', 'r') as f:
+    content = f.read()
 
-  return (
-    <div className="min-h-screen p-4 md:p-8 transition-colors duration-300 bg-[#87CEEB] dark:bg-[#040d1a] text-black dark:text-white">
-      {/* Header */}
-            <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
+# Update page wrapper background
+content = re.sub(
+    r'<div className=\{`app-container min-h-screen p-4 md:p-8 transition-colors duration-300 \$\{darkMode \? \'\' : \'light\'\}`\}>',
+    '<div className="min-h-screen p-4 md:p-8 transition-colors duration-300 bg-[#87CEEB] dark:bg-[#040d1a] text-black dark:text-white">',
+    content
+)
+
+# Replace the entire <header> ... </header> with Port Scanner header
+header_replacement = """      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/')} 
@@ -72,10 +67,23 @@ function Stats() {
             )}
           </button>
         </div>
-      </header>
+      </header>"""
 
-      {/* Tab Navigation */}
-      <nav className="flex gap-2 mb-6 w-fit">
+content = re.sub(r'<header className="mb-8 flex justify-between items-start">.*?</header>', header_replacement, content, flags=re.DOTALL)
+
+# Also remove the separate Theme Toggle Button since it's now in the header
+content = re.sub(r'\{/\* Theme Toggle Button.*?</button>', '', content, flags=re.DOTALL)
+
+# Replace the manual toggleTheme function with the useTheme hook (like I did before)
+content = content.replace("import '../index.css';", "import '../index.css';\nimport { useTheme } from '../hooks/useTheme';")
+content = re.sub(r'const \[darkMode, setDarkMode\] = useState\(true\);.*?const toggleTheme =.*?};', 'const { darkMode, toggleTheme } = useTheme();', content, flags=re.DOTALL)
+
+# Tab Navigation Styles
+# In v1.6.0 it uses style={{ backgroundColor: 'var(--bg-card)' }}
+# We will replace it with Tailwind pill container
+content = re.sub(
+    r'<nav className="flex gap-1 mb-6 rounded-lg p-1 w-fit" style=\{\{ backgroundColor: \'var\(--bg-card\)\' \}\}>.*?</nav>',
+    """<nav className="flex gap-2 mb-6 w-fit">
         {['overview', 'processes', 'docker'].map((tab) => (
           <button
             key={tab}
@@ -89,27 +97,11 @@ function Stats() {
             {tab}
           </button>
         ))}
-      </nav>
+      </nav>""",
+    content,
+    flags=re.DOTALL
+)
 
-      {/* Content */}
-      <main>
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <SystemMetrics pollingInterval={pollingInterval} />
-            </div>
-            <div className="lg:col-span-2">
-              <ProcessList compact pollingInterval={pollingInterval} />
-            </div>
-          </div>
-        )}
-        {activeTab === 'processes' && <ProcessList pollingInterval={pollingInterval} />}
-        {activeTab === 'docker' && <DockerStatus pollingInterval={pollingInterval} />}
-      </main>
+with open('frontend/src/pages/Stats.jsx', 'w') as f:
+    f.write(content)
 
-      
-    </div>
-  );
-}
-
-export default Stats;

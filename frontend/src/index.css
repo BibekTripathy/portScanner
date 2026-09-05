@@ -1,8 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,400;0,600;1,400;1,500;1,600;1,700&family=Rubik:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,400;0,600;1,400;1,500;1,600;1,700&family=Rubik:wght@400;500;600;700&display=swap');
+
 
 /* ── Theme Variables ──────────────────────────────────────────── */
 :root {
@@ -12,7 +13,7 @@
   --bg-tertiary: rgba(17, 34, 64, 0.6);
   --bg-card: rgba(10, 25, 47, 0.55);
   --border-card: rgba(0, 240, 255, 0.2);
-  --text-primary: #e6f1ff;
+  --text-primary: #ffffff;
   --text-secondary: #8892b0;
   --text-muted: #64ffda;
   --scrollbar-track: #0a192f;
@@ -25,21 +26,14 @@
   --bg-map-opacity: 0.05;
   --sort-arrow-inactive: #ffffff;
   
-  /* Background Pattern: Blue Gridlines */
-  --bg-pattern: 
-    linear-gradient(rgba(0, 150, 255, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 150, 255, 0.2) 1px, transparent 1px);
-  --bg-pattern-size: 25px 25px;
-
+  
   /* Chart Colors */
   --chart-cpu: #00f0ff;
   --chart-mem: #3b82f6; /* Medium Blue */
   --chart-disk: #8b5cf6;
   --chart-network: #e0b0ff;
 
-  /* Grid Pattern Edge Padding */
-  --pattern-inset: 24px;
-}
+  /* Grid Pattern Edge Padding */}
 
 .light {
   /* Light Mode: Sky Blue */
@@ -48,7 +42,7 @@
   --bg-tertiary: rgba(186, 230, 253, 0.6);
   --bg-card: rgba(255, 255, 255, 0.65);
   --border-card: rgba(125, 211, 252, 0.5);
-  --text-primary: #020617;
+  --text-primary: #000000;
   --text-secondary: #1e293b;
   --text-muted: #334155;
   --scrollbar-track: #e0f2fe;
@@ -57,22 +51,16 @@
   --table-header-bg: rgba(255, 255, 255, 0.85);
   --hover-row: rgba(255, 255, 255, 0.4);
 
-  --accent-neon: #0284c7;
+  --accent-neon: #0369a1;
   --bg-map-opacity: 0.1;
   --sort-arrow-inactive: var(--text-muted);
 
-  /* Background Pattern: Thin White Wavy Lines (High Opacity) */
-  --bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='30' viewBox='0 0 100 30'%3E%3Cpath d='M0 15 Q 25 30, 50 15 T 100 15' fill='none' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.9'/%3E%3C/svg%3E");
-  --bg-pattern-size: 100px 30px;
-
+  
   /* Chart Colors - Cohesive to Light Theme */
-  --chart-cpu: #0284c7;
+  --chart-cpu: #0369a1;
   --chart-mem: #2563eb; /* Medium Blue slightly darker for contrast */
   --chart-disk: #7c3aed;
-  --chart-network: #c8a2c8;
-
-  --pattern-inset: 0px; /* No inset padding for light mode */
-}
+  --chart-network: #c8a2c8;}
 
 @layer base {
   body {
@@ -95,21 +83,6 @@
   z-index: 0;
 }
 
-/* Background Pattern Injection */
-.app-container::before {
-  content: "";
-  position: fixed;
-  top: var(--pattern-inset, 0px);
-  right: var(--pattern-inset, 0px);
-  bottom: var(--pattern-inset, 0px);
-  left: var(--pattern-inset, 0px);
-  background-image: var(--bg-pattern);
-  background-size: var(--bg-pattern-size);
-  background-position: center center;
-  pointer-events: none;
-  z-index: -1;
-  transition: top 0.3s ease, right 0.3s ease, bottom 0.3s ease, left 0.3s ease;
-}
 
 /* ── Theme Transition (JS controlled) ───────────────────────── */
 ::view-transition-old(root),

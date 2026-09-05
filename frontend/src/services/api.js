@@ -1,5 +1,10 @@
 const getBaseUrl = () => {
-  return localStorage.getItem('backendUrl') || 'http://localhost:8000';
+  const stored = localStorage.getItem('backendUrl');
+  if (stored) return stored;
+  if (import.meta.env.PROD) {
+    return ''; // Relative to the origin in production
+  }
+  return 'http://localhost:8000';
 };
 
 const getHeaders = () => {

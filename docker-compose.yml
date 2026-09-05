@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  system-monitor:
+    image: ghcr.io/BibekTripathy/system-monitor:latest # Replace with your GitHub username if different
+    container_name: system-monitor
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # To monitor the HOST system accurately (CPU/RAM/Processes), we need:
+    pid: "host"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro

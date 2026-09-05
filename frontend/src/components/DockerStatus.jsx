@@ -64,28 +64,28 @@ export default function DockerStatus({ pollingInterval = 5000 }) {
   }
 
   const containerClass = isMaximized 
-    ? "fixed inset-4 z-[100] rounded-xl theme-card p-6 flex flex-col backdrop-blur-3xl shadow-2xl transition-all"
-    : `rounded-xl theme-card p-6 flex flex-col relative transition-all ${isMinimized ? 'h-fit' : 'h-full'}`;
+    ? "fixed inset-4 z-[100] rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col backdrop-blur-3xl shadow-2xl transition-all"
+    : `rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col relative transition-all ${isMinimized ? 'h-fit' : 'h-full'}`;
 
   return (
     <div className={containerClass} style={!isMaximized && !isMinimized ? { resize: 'both', overflow: 'hidden', minHeight: '200px' } : undefined}>
       {/* Window Controls */}
       <div className="absolute top-4 right-4 flex gap-1 z-50">
-        <button onClick={() => { setIsMinimized(!isMinimized); setIsMaximized(false); }} className="p-1 hover:bg-slate-500/20 rounded text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]" title={isMinimized ? "Restore" : "Minimize"}>
+        <button onClick={() => { setIsMinimized(!isMinimized); setIsMaximized(false); }} className="p-1 hover:bg-slate-500/20 rounded text-slate-600 dark:text-slate-400 transition-colors hover:text-slate-800 dark:text-slate-200" title={isMinimized ? "Restore" : "Minimize"}>
           <Minus size={14} />
         </button>
         {!isMinimized && (
-          <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-slate-500/20 rounded text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]" title={isMaximized ? "Restore down" : "Maximize"}>
+          <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-slate-500/20 rounded text-slate-600 dark:text-slate-400 transition-colors hover:text-slate-800 dark:text-slate-200" title={isMaximized ? "Restore down" : "Maximize"}>
             {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         )}
       </div>
 
       <div className={`flex justify-between items-center mb-5 pr-16 w-full ${isMinimized ? '!mb-0' : ''}`}>
-        <h2 className="text-sm font-semibold theme-muted uppercase tracking-wider">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
           Docker Containers
         </h2>
-        <span className="text-xs theme-muted px-2 py-1 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 rounded shadow-sm border border-slate-200 dark:border-slate-600">
           {containers.length} containers
         </span>
       </div>
@@ -93,9 +93,9 @@ export default function DockerStatus({ pollingInterval = 5000 }) {
       {!isMinimized && (
         <div className="flex-1 overflow-auto min-h-0 w-full">
           {loading ? (
-            <div className="theme-muted animate-pulse p-4 text-center">Loading…</div>
+            <div className="text-slate-600 dark:text-slate-200 animate-pulse p-4 text-center">Loading…</div>
           ) : containers.length === 0 ? (
-            <div className="theme-muted text-sm text-center py-8">
+            <div className="text-slate-600 dark:text-slate-200 text-sm text-center py-8">
               No Docker containers found. Is Docker running?
             </div>
           ) : (
@@ -105,7 +105,7 @@ export default function DockerStatus({ pollingInterval = 5000 }) {
             return (
               <div
                 key={c.id}
-                className="rounded-lg bg-slate-900/50 border border-slate-700/40 p-4 hover:border-slate-600 transition-colors"
+                className="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 p-4 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 shadow-sm transition-colors"
               >
                 {/* Container info row */}
                 <div className="flex items-center justify-between mb-3">
@@ -116,11 +116,11 @@ export default function DockerStatus({ pollingInterval = 5000 }) {
                           running ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]' : 'bg-slate-500'
                         }`}
                       />
-                      <span className="text-sm font-medium text-slate-200 truncate">
+                      <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
                         {c.name}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500 mt-1 ml-4 font-mono">{c.image}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-4 font-mono">{c.image}</div>
                   </div>
                   <span
                     className={`text-xs px-2 py-0.5 rounded font-medium ${
@@ -143,7 +143,7 @@ export default function DockerStatus({ pollingInterval = 5000 }) {
                     className={`text-xs px-3 py-1.5 rounded border transition-colors ${
                       logs.id === c.id
                         ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
-                        : 'bg-slate-700/50 text-slate-400 border-slate-600 hover:text-white hover:bg-slate-600'
+                        : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Logs
@@ -157,7 +157,7 @@ export default function DockerStatus({ pollingInterval = 5000 }) {
 
                 {/* Logs panel */}
                 {logs.id === c.id && (
-                  <pre className="mt-3 p-3 rounded bg-black/40 text-xs text-slate-300 max-h-48 overflow-auto font-mono border border-slate-700/30 whitespace-pre-wrap">
+                  <pre className="mt-3 p-3 rounded bg-black/40 text-xs text-slate-700 dark:text-slate-300 max-h-48 overflow-auto font-mono border border-slate-700/30 whitespace-pre-wrap">
                     {logs.text || 'No logs available.'}
                   </pre>
                 )}
@@ -179,8 +179,8 @@ function ActionBtn({ label, onClick, disabled, className = '' }) {
       disabled={disabled}
       className={`text-xs px-3 py-1.5 rounded border transition-colors ${
         disabled
-          ? 'bg-slate-800/30 border-slate-700/30 text-slate-600 cursor-not-allowed'
-          : `bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white ${className}`
+          ? 'bg-slate-100 dark:bg-slate-800/30 border-slate-200 dark:border-slate-700/30 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+          : `bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 ${className}`
       }`}
     >
       {label}
