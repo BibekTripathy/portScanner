@@ -76,7 +76,7 @@ function LineChart({ history, isMaximized, showCores, pollingInterval }) {
       <div className="relative w-full transition-all duration-300" style={{ height: isMaximized ? 'min(60vh, 600px)' : height, minHeight: height }}>
         {/* Y-axis Labels */}
         {[0, 25, 50, 75, 100].map(val => (
-          <div key={val} className="absolute left-0 w-8 text-right text-[10px] text-[var(--text-secondary)] pr-2" 
+          <div key={val} className="absolute left-0 w-8 text-right text-[10px] text-slate-600 dark:text-slate-400 pr-2" 
                style={{ top: `${100 - val}%`, transform: 'translateY(-50%)' }}>
             {val}
           </div>
@@ -116,11 +116,11 @@ function LineChart({ history, isMaximized, showCores, pollingInterval }) {
       
       {/* Legend */}
       <div className={`flex gap-4 text-xs drop-shadow-md transition-all duration-300 ${isMaximized ? 'mt-12 justify-center text-sm' : 'mt-8'}`}>
-         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-cpu)', color: 'var(--chart-cpu)' }} /> <span style={{ color: 'var(--text-secondary)' }}>CPU</span></div>
-         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-mem)', color: 'var(--chart-mem)' }} /> <span style={{ color: 'var(--text-secondary)' }}>Memory</span></div>
-         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-disk)', color: 'var(--chart-disk)' }} /> <span style={{ color: 'var(--text-secondary)' }}>Disk</span></div>
-         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-network)', color: 'var(--chart-network)' }} /> <span style={{ color: 'var(--text-secondary)' }}>Network</span></div>
-         {coreHistoryAvailable && <div className="flex items-center gap-1"><span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Core details shown</span></div>}
+         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-cpu)', color: 'var(--chart-cpu)' }} /> <span className="text-slate-600 dark:text-slate-400">CPU</span></div>
+         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-mem)', color: 'var(--chart-mem)' }} /> <span className="text-slate-600 dark:text-slate-400">Memory</span></div>
+         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-disk)', color: 'var(--chart-disk)' }} /> <span className="text-slate-600 dark:text-slate-400">Disk</span></div>
+         <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: 'var(--chart-network)', color: 'var(--chart-network)' }} /> <span className="text-slate-600 dark:text-slate-400">Network</span></div>
+         {coreHistoryAvailable && <div className="flex items-center gap-1"><span className="text-xs text-slate-600 dark:text-slate-400">Core details shown</span></div>}
       </div>
     </div>
   );
@@ -175,8 +175,8 @@ function GaugeChart({ metrics, isMaximized }) {
          {metrics.map((m) => (
            <div key={m.label} className="flex items-center gap-1">
              <span className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: m.color, color: m.color }} />
-             <span style={{ color: 'var(--text-secondary)' }}>{m.label}: </span>
-             <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{(m.value ?? 0).toFixed(0)}%</span>
+             <span className="text-slate-600 dark:text-slate-400">{m.label}: </span>
+             <span className="font-bold text-slate-800 dark:text-slate-200">{(m.value ?? 0).toFixed(0)}%</span>
            </div>
          ))}
       </div>
@@ -192,23 +192,23 @@ function BarChart({ metrics, isMaximized, showCores, coreUsage }) {
         <div key={m.label}>
           <div className={`flex justify-between items-end mb-2 ${isMaximized ? 'mb-4' : ''}`}>
             <div>
-              <span className="text-sm font-bold uppercase tracking-wider" style={{ color: m.color || 'var(--text-primary)' }}>{m.label}</span>
+              <span className={`text-sm font-bold uppercase tracking-wider ${!m.color ? 'text-slate-800 dark:text-slate-200' : ''}`} style={{ color: m.color }}>{m.label}</span>
               {m.label === 'Network' && (
                 <span
                   className="ml-1 text-xs font-medium cursor-help" 
                   title="Network % = (bytes sent+recv per second) / 1Gbps × 100"
-                  style={{ color: 'var(--text-muted)' }}
+                  className="text-slate-500 dark:text-slate-400"
                 >
                   ⓘ
                 </span>
               )}
-              {m.sub && <span className="text-xs ml-2 opacity-80" style={{ color: 'var(--text-muted)' }}>{m.sub}</span>}
+              {m.sub && <span className="text-xs ml-2 opacity-80 text-slate-500 dark:text-slate-400">{m.sub}</span>}
             </div>
-            <span className={`tabular-nums transition-all ${isMaximized ? 'text-2xl font-medium' : 'text-lg font-bold'}`} style={{ color: 'var(--text-primary)' }}>
+            <span className={`tabular-nums transition-all ${isMaximized ? 'text-2xl font-medium' : 'text-lg font-bold'} text-slate-800 dark:text-slate-200`}>
               {(m.value ?? 0).toFixed(1)}%
             </span>
           </div>
-          <div className={`${isMaximized ? 'h-6' : 'h-2.5'} transition-all duration-300 w-full rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] border`} style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border-card)' }}>
+          <div className={`${isMaximized ? 'h-6' : 'h-2.5'} transition-all duration-300 w-full rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] border bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600`}>
             <div
               className="h-full rounded-full transition-all duration-700 ease-out"
               style={{ 
@@ -220,8 +220,8 @@ function BarChart({ metrics, isMaximized, showCores, coreUsage }) {
           </div>
 
           {showCores && m.label === 'CPU' && Array.isArray(coreUsage) && (
-            <div className="mt-3 p-3 rounded-lg border border-[var(--border-card)] bg-[var(--bg-secondary)]">
-              <div className="text-xs text-[var(--text-muted)] mb-2">Per-core CPU Usage</div>
+            <div className="mt-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Per-core CPU Usage</div>
               <div className="grid grid-cols-2 gap-2">
                 {coreUsage.map((value, coreIdx) => (
                   <div key={`bar-core-${coreIdx}`} className="text-xs">
@@ -229,7 +229,7 @@ function BarChart({ metrics, isMaximized, showCores, coreUsage }) {
                       <span>Core {coreIdx}</span>
                       <span className="font-semibold">{formatPercent(value)}</span>
                     </div>
-                    <div className="h-2 rounded bg-[var(--bg-primary)] overflow-hidden">
+                    <div className="h-2 rounded bg-slate-100 dark:bg-slate-800 overflow-hidden">
                       <div className="h-full rounded" style={{ width: `${Math.min(value, 100)}%`, backgroundColor: 'var(--chart-cpu)' }} />
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export default function SystemMetrics({ pollingInterval = 3000 }) {
 
   if (!data) {
     return (
-      <div className="rounded-xl theme-card p-6 animate-pulse">
+      <div className="rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 p-6 animate-pulse">
         <div className="h-4 rounded w-1/3 mb-6" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
         <div className="space-y-5">
           <div className="h-12 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
@@ -348,58 +348,52 @@ export default function SystemMetrics({ pollingInterval = 3000 }) {
   ];
 
   const containerClass = isMaximized 
-    ? "fixed inset-4 z-[100] rounded-xl theme-card p-6 flex flex-col backdrop-blur-3xl shadow-2xl transition-all"
-    : `rounded-xl theme-card p-6 flex flex-col relative transition-all ${isMinimized ? 'h-fit' : 'min-h-[320px]'}`;
+    ? "fixed inset-4 z-[100] rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col backdrop-blur-3xl shadow-2xl transition-all"
+    : `rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col relative transition-all ${isMinimized ? 'h-fit' : 'min-h-[320px]'}`;
 
   return (
     <div className={containerClass} style={!isMaximized && !isMinimized ? { resize: 'both', overflow: 'hidden', minHeight: '320px' } : undefined}>
       {/* Window Controls */}
       <div className="absolute top-4 right-4 flex gap-1 z-50">
-        <button onClick={() => { setIsMinimized(!isMinimized); setIsMaximized(false); }} className="p-1 hover:bg-slate-500/20 rounded text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]" title={isMinimized ? "Restore" : "Minimize"}>
+        <button onClick={() => { setIsMinimized(!isMinimized); setIsMaximized(false); }} className="p-1 hover:bg-slate-500/20 rounded text-slate-600 dark:text-slate-400 transition-colors hover:text-slate-800 dark:text-slate-200" title={isMinimized ? "Restore" : "Minimize"}>
           <Minus size={14} />
         </button>
         {!isMinimized && (
-          <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-slate-500/20 rounded text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]" title={isMaximized ? "Restore down" : "Maximize"}>
+          <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-slate-500/20 rounded text-slate-600 dark:text-slate-400 transition-colors hover:text-slate-800 dark:text-slate-200" title={isMaximized ? "Restore down" : "Maximize"}>
             {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         )}
       </div>
 
       <div className={`flex flex-col gap-3 mb-5 w-full pr-16 ${isMinimized ? '!mb-0' : ''}`}>
-        <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           System Resources
         </h2>
-        <div className="flex items-center gap-3 w-full justify-between sm:justify-start">
+        <div className="flex flex-wrap items-center gap-3 w-full justify-between sm:justify-start">
           {data.uptime && (
-            <div className="text-[10px] font-mono rounded border flex flex-col items-start justify-center w-28 h-10 px-3"
-                  style={{ color: 'var(--text-muted)', backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-card)' }}>
+            <div className="text-[10px] font-mono rounded border border-slate-200 dark:border-slate-700 flex flex-col items-start justify-center w-24 h-10 px-2 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
               <span className="opacity-70 text-[8px] leading-none mb-1 tracking-widest font-sans">UPTIME</span>
               <span className="leading-none text-xs">{formatUptime(data.uptime)}</span>
             </div>
           )}
           {/* Chart Type Dropdown with custom arrow */}
-          <div className="relative w-28 h-10">
+          <div className="relative w-24 h-10">
             <select
               value={chartType}
               onChange={(e) => setChartType(e.target.value)}
-              className="appearance-none text-xs rounded border cursor-pointer outline-none transition-colors w-full h-full px-3 pr-8"
-              style={{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-secondary)',
-                borderColor: 'var(--border-card)',
-              }}
+              className="appearance-none text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer outline-none transition-colors w-full h-full px-3 pr-8 shadow-sm"
             >
               <option value="bar">Bar</option>
               <option value="line">Line</option>
               <option value="gauge">Gauge</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" style={{ color: 'var(--text-secondary)' }}>
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
               </svg>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
             <label className="flex items-center gap-1">
               <input
                 type="checkbox"
@@ -419,23 +413,23 @@ export default function SystemMetrics({ pollingInterval = 3000 }) {
         {chartType === 'line' && <LineChart history={history} isMaximized={isMaximized} showCores={showCores} pollingInterval={pollingInterval} />}
         {chartType === 'gauge' && <GaugeChart metrics={metrics} isMaximized={isMaximized} />}
 
-        <div className="mt-8 mb-4 p-3 shrink-0 rounded-lg border border-[var(--border-card)] bg-[var(--bg-secondary)]">
-          <div className="text-xs text-[var(--text-muted)] mb-2">Network Traffic</div>
+        <div className="mt-8 mb-4 p-3 shrink-0 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Network Traffic</div>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
-              <div className="text-[var(--text-secondary)]">Sent</div>
+              <div className="text-slate-600 dark:text-slate-400">Sent</div>
               <div className="font-semibold">{formatBytes(mainNetwork.bytes_sent)}</div>
             </div>
             <div>
-              <div className="text-[var(--text-secondary)]">Received</div>
+              <div className="text-slate-600 dark:text-slate-400">Received</div>
               <div className="font-semibold">{formatBytes(mainNetwork.bytes_recv)}</div>
             </div>
             <div>
-              <div className="text-[var(--text-secondary)]">Packets Sent</div>
+              <div className="text-slate-600 dark:text-slate-400">Packets Sent</div>
               <div className="font-semibold">{mainNetwork.packets_sent}</div>
             </div>
             <div>
-              <div className="text-[var(--text-secondary)]">Packets Recv</div>
+              <div className="text-slate-600 dark:text-slate-400">Packets Recv</div>
               <div className="font-semibold">{mainNetwork.packets_recv}</div>
             </div>
           </div>

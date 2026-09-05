@@ -1,4 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, status, Header
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -192,5 +195,23 @@ def get_docker_logs(container_id: str, tail: int = 100, current_user: models.Use
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# --- FRONTEND (STATIC FILES) ---
+frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+if os.path.exists(frontend_dist):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+    
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str):
+        # Allow API calls to 404 naturally
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not Found")
+            
+        file_path = os.path.join(frontend_dist, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
+
 if __name__ == "__main__":
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

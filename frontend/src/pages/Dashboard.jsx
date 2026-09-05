@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { RefreshCw, Sun, Moon, ShieldAlert, Monitor, ArrowUpDown, ArrowUp, ArrowDown, LogOut, ArrowLeft } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
 
 function Dashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleTheme } = useTheme();
   const [error, setError] = useState('');
   const [lastScanned, setLastScanned] = useState(null);
   
@@ -20,20 +21,6 @@ function Dashboard() {
     if (!backendUrl) navigate('/setup');
     if (!token) navigate('/login');
   }, [backendUrl, token, navigate]);
-
-  useEffect(() => {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
 
   const fetchScanData = async () => {
     if (!token) return;
@@ -126,7 +113,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-300 transition-colors duration-200">
+    <div className="min-h-screen bg-[#87CEEB] dark:bg-[#040d1a] text-black dark:text-white transition-colors duration-300">
       <div className="max-w-6xl mx-auto p-6">
         <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
           <div className="flex items-center gap-4">
@@ -156,7 +143,7 @@ function Dashboard() {
             </div>
 
             <button 
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={toggleTheme}
               className="p-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors text-slate-500 dark:text-slate-400"
               title="Toggle Light/Dark Mode"
             >
