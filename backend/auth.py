@@ -19,21 +19,20 @@ You wanted to learn how this works, so here is the breakdown:
    signature breaks, and our server will reject it.
 """
 
-from passlib.context import CryptContext
+import bcrypt
 from datetime import datetime, timedelta
 import jwt
 
 # 1. Password Hashing Setup
-# We tell Passlib to use the bcrypt algorithm
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# We use the bcrypt library directly
 
 def verify_password(plain_password, hashed_password):
     """Checks if the plain password matches the hashed version."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def get_password_hash(password):
     """Converts a plain password into a secure bcrypt hash."""
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 # 2. JWT Configuration

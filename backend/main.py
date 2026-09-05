@@ -8,6 +8,7 @@ import jwt
 from modules.scanner import scan_listening_ports
 from modules.mapper import processes_map
 from database import engine, Base, get_db
+from modules.system_utils import get_cpu_info, get_memory_info, get_disk_info, get_network_info, get_uptime
 import models
 import auth
 import uvicorn
@@ -118,6 +119,24 @@ def get_scan_results(current_user: models.User = Depends(get_current_user)):
         
         mapped_ports = processes_map(raw_ports)
         return {"status": "success", "data": mapped_ports, "total": len(mapped_ports)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics")
+def get_system_metrics(current_user: models.User = Depends(get_current_user)):
+    """
+    Returns full system stats (CPU, Memory, Disk, Network, Uptime)
+    Requires valid JWT authentication.
+    """
+    try:
+        data = {
+            "cpu": get_cpu_info(),
+            "memory": get_memory_info(),
+            "disk": get_disk_info(),
+            "network": get_network_info(),
+            "uptime": get_uptime()
+        }
+        return {"status": "success", "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
