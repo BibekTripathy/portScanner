@@ -38,6 +38,19 @@ Grab the installer for your platform from the
 - **Linux** — `.deb`, `.rpm` or `.AppImage`
 - **Windows** — `.msi` or the `.exe` installer
 
+### Arch Linux
+
+Arch has no `.deb`, so the repository ships a PKGBUILD that unpacks the released
+one. From a clone:
+
+```bash
+paru -U ./packaging/aur/PKGBUILD      # or: cd packaging/aur && makepkg -si
+```
+
+It pulls the `.deb` for the current `pkgver` from the GitHub release and needs
+only `webkit2gtk-4.1`, `gtk3` and `libsoup3` — no Rust, Node or Python
+toolchain. Uninstall with `paru -R portscanner-bin`.
+
 The app is a [Tauri](https://tauri.app) shell that starts the Python backend as a
 bundled sidecar on a random loopback port, with a token generated at launch. Nothing
 listens on your network, and there is no login screen for your own machine. Closing
