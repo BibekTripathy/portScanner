@@ -188,7 +188,7 @@ function GaugeChart({ metrics, isMaximized }) {
 function BarChart({ metrics, isMaximized, showCores, coreUsage }) {
   return (
     <div className={`space-y-6 mt-4 transition-all duration-300 ${isMaximized ? 'flex flex-col justify-around h-full flex-1 py-10' : ''}`}>
-      {metrics.map((m, idx) => (
+      {metrics.map((m) => (
         <div key={m.label}>
           <div className={`flex justify-between items-end mb-2 ${isMaximized ? 'mb-4' : ''}`}>
             <div>
@@ -322,6 +322,8 @@ export default function SystemMetrics({ pollingInterval = 3000 }) {
   };
 
   const networkRateBps = calculateNetworkRate();
+  // There is no meaningful ceiling for throughput, so the bar is scaled against a
+  // gigabit link purely to give the tile something to fill.
   const networkPercent = Math.min(100, (networkRateBps / 125_000_000) * 100);
 
   const metrics = [
@@ -344,6 +346,13 @@ export default function SystemMetrics({ pollingInterval = 3000 }) {
       sub: `${formatBytes(mainDisk.used)} / ${formatBytes(mainDisk.total)}`,
       color: 'var(--chart-disk)',
       gradient: 'from-violet-500 to-purple-500',
+    },
+    {
+      label: 'Network',
+      value: networkPercent,
+      sub: `${formatBytes(networkRateBps)}/s`,
+      color: 'var(--chart-network)',
+      gradient: 'from-fuchsia-400 to-pink-500',
     },
   ];
 

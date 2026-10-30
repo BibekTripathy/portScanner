@@ -13,6 +13,9 @@ import { useConnections } from './hooks/useConnections';
 function RequireTarget({ children }) {
   const { active, authenticated } = useConnections();
   if (!active) return <Navigate to="/servers" replace />;
+  // A local backend that never came up has no login to offer, so send the user to
+  // the server list (which explains the state) rather than to a form that cannot work.
+  if (active.available === false) return <Navigate to="/servers" replace />;
   if (!authenticated) return <Navigate to="/login" replace />;
   return children;
 }

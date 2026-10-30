@@ -106,7 +106,7 @@ def get_current_user(
 # --- PUBLIC ENDPOINTS ---
 
 @app.get("/api/info")
-def get_instance_info():
+def get_instance_info(db: Session = Depends(get_db)):
     """
     Unauthenticated identity of this instance: name, version, OS and whether a login
     is required. The target switcher in the UI calls this when you add a server, to
@@ -114,15 +114,40 @@ def get_instance_info():
     """
     info = settings.describe()
     info["docker_available"] = docker_service.get_client() is not None
+    # Only true on a fresh instance, where the first account still has to be made.
+    info["registration_open"] = db.query(models.User).count() == 0
     return {"status": "success", "data": info}
 
 
+MIN_PASSWORD_LENGTH = 8
+
+
 @app.post("/api/register")
-def register_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def register_user(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
     """
-    Registers a new user. We use OAuth2PasswordRequestForm for standard compatibility.
-    It expects 'username' and 'password' in the request body (form-data).
+    Registers a new user.
+
+    This service can kill processes and control containers, so registration is not
+    open: the first account on a fresh instance can be created by anyone who can
+    reach it (there is nobody to authorise it yet), and after that only an existing
+    user may add another. Without this, anyone who found an exposed instance could
+    simply sign themselves up.
     """
+    if db.query(models.User).count() > 0:
+        # Reuses the normal auth path, so a desktop loopback token counts too.
+        get_current_user(request=request, token=token, db=db)
+
+    if len(form_data.password) < MIN_PASSWORD_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Password must be at least {MIN_PASSWORD_LENGTH} characters.",
+        )
+
     # Check if user already exists
     existing_user = db.query(models.User).filter(models.User.username == form_data.username).first()
     if existing_user:

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { processAPI } from '../services/api';
-import { RefreshCw, Search, List, Grid } from 'lucide-react';
+import { Search, List, Grid } from 'lucide-react';
 
 export default function ProcessList({ compact = false, pollingInterval = 3000 }) {
   const [processes, setProcesses] = useState([]);

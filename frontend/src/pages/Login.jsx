@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User as UserIcon, ShieldAlert, LogIn, UserPlus, Server, ArrowLeft } from 'lucide-react';
 import { useConnections } from '../hooks/useConnections';
 import { setToken } from '../services/connections';
-import { authAPI } from '../services/api';
+import { authAPI, infoAPI } from '../services/api';
 
 /**
  * Login for the *active* target. Each server has its own user database, so the token
@@ -16,9 +16,30 @@ function Login() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
+  // null while we are still asking the server. Registration is only open on an
+  // instance that has no accounts yet, so there is no point offering it otherwise.
+  const [registrationOpen, setRegistrationOpen] = useState(null);
   const navigate = useNavigate();
 
   const { active } = useConnections();
+
+  useEffect(() => {
+    let cancelled = false;
+    setRegistrationOpen(null);
+    infoAPI
+      .getInfo()
+      .then((info) => {
+        if (!cancelled) setRegistrationOpen(!!info.registration_open);
+      })
+      .catch(() => {
+        // Unreachable, or an older server that does not report this. Leave the
+        // option visible and let the request itself say what went wrong.
+        if (!cancelled) setRegistrationOpen(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [active?.id, active?.url]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,17 +143,25 @@ function Login() {
         </form>
 
         <div className="mt-6 flex flex-col items-center gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegistering(!isRegistering);
-              setError('');
-              setNotice('');
-            }}
-            className="text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
-          >
-            {isRegistering ? 'Already have an account? Log in' : 'Need an account? Register'}
-          </button>
+          {(registrationOpen || isRegistering) && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setError('');
+                setNotice('');
+              }}
+              className="text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
+            >
+              {isRegistering ? 'Already have an account? Log in' : 'Create the first account'}
+            </button>
+          )}
+
+          {registrationOpen === false && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+              This server already has an account. Ask its owner to add one for you.
+            </p>
+          )}
 
           <button
             type="button"
