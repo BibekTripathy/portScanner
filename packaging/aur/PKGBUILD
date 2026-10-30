@@ -7,7 +7,7 @@
 #
 pkgname=portscanner-bin
 _appname=portScanner
-pkgver=1.1.1
+pkgver=1.1.2
 pkgrel=1
 pkgdesc="System monitor and port scanner desktop app with multi-server support"
 arch=('x86_64')

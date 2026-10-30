@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "portScanner"
-APP_VERSION = "1.1.1"
+APP_VERSION = "1.1.2"
 
 # `desktop` is only ever set by the Tauri shell; anything else defaults to server rules.
 MODE = os.environ.get("PORTSCANNER_MODE", "server").lower()
