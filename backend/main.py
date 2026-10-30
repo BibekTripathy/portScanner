@@ -285,16 +285,25 @@ else:
 if os.path.exists(frontend_dist):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
     
+    _dist_root = os.path.realpath(frontend_dist)
+    _index_file = os.path.join(_dist_root, "index.html")
+
     @app.get("/{full_path:path}")
     def serve_frontend(full_path: str):
         # Allow API calls to 404 naturally
         if full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="Not Found")
-            
-        file_path = os.path.join(frontend_dist, full_path)
-        if full_path and os.path.isfile(file_path):
-            return FileResponse(file_path)
-        return FileResponse(os.path.join(frontend_dist, "index.html"))
+
+        # The requested path is resolved and then checked to be inside the build
+        # directory. Without this, `GET /../../backend/settings.py` reads any file
+        # the process can - including the signing key, which is a full auth bypass.
+        candidate = os.path.realpath(os.path.join(_dist_root, full_path))
+        inside = candidate == _dist_root or candidate.startswith(_dist_root + os.sep)
+
+        if full_path and inside and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        # Anything else is a client-side route: hand back the SPA shell.
+        return FileResponse(_index_file)
 
 if __name__ == "__main__":
     # Development entrypoint. The packaged binary and the desktop sidecar go through
