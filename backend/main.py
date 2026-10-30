@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status, Header
+from fastapi import FastAPI, HTTPException, Depends, Request, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
@@ -17,28 +17,58 @@ from modules.process_service import process_service
 from modules.docker_service import docker_service
 import models
 import auth
+import settings
+import secrets as _secrets
 import uvicorn
 
 # Create the database tables if they don't exist
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Unified Monitor API", description="API for monitoring ports and system stats")
+app = FastAPI(
+    title="Unified Monitor API",
+    description="API for monitoring ports and system stats",
+    version=settings.APP_VERSION,
+)
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # OAuth2 setup: This tells FastAPI where the client should go to get a token.
 # It makes the Swagger UI (/docs) automatically support an "Authorize" button.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+# auto_error=False so a missing header falls through to the desktop token check below
+# instead of being rejected before we get a look at it.
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False)
+
+
+class LocalUser:
+    """
+    Stand-in identity for the desktop app. The Tauri shell starts the backend with a
+    random PORTSCANNER_LOCAL_TOKEN, which is accepted only on loopback connections --
+    so the person sitting at the machine is not asked to register an account to look
+    at their own system, while every remote deployment still requires a JWT login.
+    """
+    id = 0
+    username = "local"
+    is_local = True
+
+
+def _is_loopback(request: Request) -> bool:
+    client = request.client
+    return bool(client) and client.host in settings.LOOPBACK_HOSTS
+
 
 # --- AUTHENTICATION DEPENDENCY ---
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
     """
     This function acts as a guard/bouncer. 
     Any endpoint that has this as a dependency will REQUIRE a valid token.
@@ -48,6 +78,15 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    if not token:
+        raise credentials_exception
+
+    # Desktop shortcut: constant-time compare, loopback only.
+    if settings.LOCAL_TOKEN and _is_loopback(request):
+        if _secrets.compare_digest(token, settings.LOCAL_TOKEN):
+            return LocalUser()
+
     try:
         # Decode the token using our secret key
         payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
@@ -65,6 +104,18 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
 # --- PUBLIC ENDPOINTS ---
+
+@app.get("/api/info")
+def get_instance_info():
+    """
+    Unauthenticated identity of this instance: name, version, OS and whether a login
+    is required. The target switcher in the UI calls this when you add a server, to
+    confirm the address is reachable and to label it with the real hostname.
+    """
+    info = settings.describe()
+    info["docker_available"] = docker_service.get_client() is not None
+    return {"status": "success", "data": info}
+
 
 @app.post("/api/register")
 def register_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -179,7 +230,7 @@ class DockerActionRequest(BaseModel):
 @app.post("/api/docker/containers/{container_id}/control")
 def control_docker_container(container_id: str, req: DockerActionRequest, current_user: models.User = Depends(get_current_user)):
     try:
-        success, msg = docker_service.control_container(container_id, req.action)
+        success, msg = docker_service.manage_container(container_id, req.action)
         if success:
             return {"status": "success", "message": msg}
         else:
@@ -221,5 +272,6 @@ if os.path.exists(frontend_dist):
         return FileResponse(os.path.join(frontend_dist, "index.html"))
 
 if __name__ == "__main__":
-
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    # Development entrypoint. The packaged binary and the desktop sidecar go through
+    # server.py instead, which parses CLI flags before this module is imported.
+    uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=not settings.IS_FROZEN)

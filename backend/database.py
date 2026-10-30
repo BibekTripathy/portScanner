@@ -10,9 +10,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# We will store our database in a file called 'portscanner.db' inside the backend folder.
-# The `sqlite:///` prefix tells SQLAlchemy to use SQLite.
-SQLALCHEMY_DATABASE_URL = "sqlite:///./portscanner.db"
+import settings
+
+# The database lives in the per-user data directory resolved by settings.py, so a
+# packaged app (whose install directory is read-only) and the Docker image (whose
+# /data volume is mounted) both get a writable location.
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{settings.DB_PATH}"
 
 # The 'engine' is the core interface to the database.
 # `check_same_thread=False` is needed for SQLite in FastAPI because FastAPI can 

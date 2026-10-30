@@ -1,28 +1,48 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Activity, Network, LogOut, LayoutDashboard, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import TargetSwitcher from '../components/TargetSwitcher';
+import { useConnections } from '../hooks/useConnections';
+import { clearToken } from '../services/connections';
+import { infoAPI } from '../services/api';
 
 function Home() {
   const navigate = useNavigate();
-  const token = localStorage.getItem('authToken');
-  const backendUrl = localStorage.getItem('backendUrl');
-
   const { darkMode, toggleTheme } = useTheme();
+  const { active, signature } = useConnections();
+  const [info, setInfo] = useState(null);
 
+  // Identify whichever machine is selected, so the landing page says what you are
+  // actually looking at. Re-runs when the target changes.
   useEffect(() => {
-    if (!backendUrl) navigate('/setup');
-    if (!token) navigate('/login');
-  }, [backendUrl, token, navigate]);
+    let cancelled = false;
+    setInfo(null);
+    infoAPI
+      .getInfo()
+      .then((data) => !cancelled && setInfo(data))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [signature]);
 
   return (
     <div className="min-h-screen bg-[#87CEEB] dark:bg-[#040d1a] text-black dark:text-white transition-colors duration-300">
       <header className="flex justify-between items-center p-6 bg-white/60 dark:bg-[#0a192f]/50 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-cyan-500/20">
         <div className="flex items-center gap-3">
           <LayoutDashboard className="text-indigo-500" size={28} />
-          <h1 className="text-2xl font-medium tracking-tight">Unified Dashboard</h1>
+          <div>
+            <h1 className="text-2xl font-medium tracking-tight">Unified Dashboard</h1>
+            {info && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {info.hostname} · {info.system} {info.release} · v{info.version}
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
+          <TargetSwitcher />
           <button 
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
@@ -32,7 +52,7 @@ function Home() {
           </button>
           <button 
             onClick={() => {
-              localStorage.removeItem('authToken');
+              clearToken(active.id);
               navigate('/login');
             }}
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
@@ -54,7 +74,7 @@ function Home() {
               </div>
               <h3 className="text-2xl font-semibold mb-2">Port Scanner</h3>
               <p className="text-slate-500 dark:text-slate-400">
-                Scan the host machine for listening TCP/UDP ports, mapped to their underlying processes and users.
+                Scan {active?.kind === 'remote' ? active.label : 'this machine'} for listening TCP/UDP ports, mapped to their underlying processes and users.
               </p>
             </div>
           </Link>

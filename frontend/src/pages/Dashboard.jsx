@@ -2,6 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { RefreshCw, Sun, Moon, ShieldAlert, Monitor, ArrowUpDown, ArrowUp, ArrowDown, LogOut, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import TargetSwitcher from '../components/TargetSwitcher';
+import { useConnections } from '../hooks/useConnections';
+import { clearToken } from '../services/connections';
+import { scanAPI, AuthError } from '../services/api';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -14,47 +18,33 @@ function Dashboard() {
   const [refreshInterval, setRefreshInterval] = useState(0);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
-  const backendUrl = localStorage.getItem('backendUrl');
-  const token = localStorage.getItem('authToken');
-
-  useEffect(() => {
-    if (!backendUrl) navigate('/setup');
-    if (!token) navigate('/login');
-  }, [backendUrl, token, navigate]);
+  // Which machine we are scanning; `signature` changes when the user switches target.
+  const { active, signature } = useConnections();
 
   const fetchScanData = async () => {
-    if (!token) return;
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${backendUrl}/api/scan`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.status === 401) {
-        // Token expired or invalid
-        localStorage.removeItem('authToken');
+      const result = await scanAPI.getPorts();
+      setData(result || []);
+      setLastScanned(new Date());
+    } catch (err) {
+      if (err instanceof AuthError) {
         navigate('/login');
         return;
       }
-      if (!response.ok) {
-        throw new Error('Failed to fetch scan data');
-      }
-      const result = await response.json();
-      setData(result.data || []);
-      setLastScanned(new Date());
-    } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial fetch
+  // Initial fetch, and again whenever the selected machine changes.
   useEffect(() => {
+    setData([]);
+    setLastScanned(null);
     fetchScanData();
-  }, []);
+  }, [signature]);
 
   // Auto-refresh logic
   useEffect(() => {
@@ -122,11 +112,15 @@ function Dashboard() {
             </Link>
             <div className="flex items-center gap-3">
               <Monitor className="text-indigo-500 dark:text-indigo-400" size={28} />
-              <h1 className="text-2xl font-medium tracking-tight">Port Scanner</h1>
+              <div>
+                <h1 className="text-2xl font-medium tracking-tight">Port Scanner</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{active?.label}</p>
+              </div>
             </div>
           </div>
           
           <div className="flex items-center gap-4 flex-wrap">
+            <TargetSwitcher />
             <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm">
               <label htmlFor="autoRefresh" className="font-medium">Auto-refresh:</label>
               <select
@@ -151,7 +145,7 @@ function Dashboard() {
             </button>
             <button 
               onClick={() => {
-                localStorage.removeItem('authToken');
+                clearToken(active.id);
                 navigate('/login');
               }}
               className="p-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors text-slate-500 dark:text-slate-400"

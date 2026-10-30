@@ -1,16 +1,24 @@
-version: '3.8'
-
 services:
   system-monitor:
-    image: ghcr.io/BibekTripathy/system-monitor:latest # Replace with your GitHub username if different
+    image: ghcr.io/bibektripathy/portscanner:latest
     container_name: system-monitor
     restart: unless-stopped
     ports:
       - "8000:8000"
-    # To monitor the HOST system accurately (CPU/RAM/Processes), we need:
+    # To report on the HOST system (CPU/RAM/processes) rather than the container:
     pid: "host"
     privileged: true
+    environment:
+      # Set this to a long random string. If you leave it out, a key is generated into
+      # the /data volume on first run, which is fine as long as that volume persists.
+      # PORTSCANNER_SECRET_KEY: "change-me"
+      PORTSCANNER_DATA_DIR: /data
     volumes:
+      # Accounts, signing key and logs. Keep this, or everyone has to register again.
+      - monitor-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+
+volumes:
+  monitor-data:

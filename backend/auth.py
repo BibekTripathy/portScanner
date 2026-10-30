@@ -20,8 +20,10 @@ You wanted to learn how this works, so here is the breakdown:
 """
 
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
+
+import settings
 
 # 1. Password Hashing Setup
 # We use the bcrypt library directly
@@ -36,11 +38,12 @@ def get_password_hash(password):
 
 
 # 2. JWT Configuration
-# SECURITY NOTE: In a real app, NEVER hardcode this. It should be in a .env file!
-# If a hacker gets this key, they can forge their own JWT tokens.
-SECRET_KEY = "my_super_secret_learning_key_do_not_use_in_prod"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # Token lasts for 1 week
+# The key lives in settings.py: it comes from PORTSCANNER_SECRET_KEY when deploying,
+# and is otherwise generated once and stored in the per-user data directory. It is
+# never hardcoded here, because anyone holding it can forge tokens.
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def create_access_token(data: dict):
     """
@@ -50,7 +53,7 @@ def create_access_token(data: dict):
     to_encode = data.copy()
     
     # Calculate when this token should expire
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     
     # Actually sign the token with our secret key
