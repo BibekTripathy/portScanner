@@ -95,9 +95,10 @@ Then either open `http://<your-server-ip>:8000` in a browser, or add that addres
 the desktop app under **Servers → Add a server**. Register the first account on the
 login screen.
 
-Ten failed logins from one address lock that address out for five minutes. Behind a
-reverse proxy every client shares the proxy's address, so forward the real one
-(`X-Forwarded-For`) or expect the lockout to apply to everyone at once.
+Ten failed logins from one address lock that address out for five minutes. The
+address is the one on the socket: `X-Forwarded-For` is deliberately not trusted, so
+behind a reverse proxy every client counts as the proxy and the lockout applies to
+everyone at once. Rate-limit at the proxy instead if that matters to you.
 
 > `privileged` and `pid: host` are what let the container report on the host rather
 > than on itself. Treat the port as admin-only: it can kill processes and control
