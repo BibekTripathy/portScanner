@@ -19,6 +19,7 @@ import models
 import auth
 import settings
 import secrets as _secrets
+import time
 import uvicorn
 
 # Create the database tables if they don't exist
@@ -163,21 +164,60 @@ def register_user(
     
     return {"msg": f"User {new_user.username} successfully created!"}
 
+# Failed logins per client address: (count, first_failure_at). In memory only, which
+# is enough to make an online password guess impractical without adding a dependency
+# or a table; it resets when the service restarts.
+_FAILED_LOGINS: dict[str, tuple[int, float]] = {}
+MAX_LOGIN_FAILURES = 10
+LOGIN_LOCKOUT_SECONDS = 300
+
+
+def _login_blocked(client: str) -> int:
+    """Seconds the caller still has to wait, or 0 when they may try."""
+    record = _FAILED_LOGINS.get(client)
+    if not record:
+        return 0
+    failures, first_at = record
+    elapsed = time.monotonic() - first_at
+    if elapsed > LOGIN_LOCKOUT_SECONDS:
+        del _FAILED_LOGINS[client]
+        return 0
+    if failures < MAX_LOGIN_FAILURES:
+        return 0
+    return int(LOGIN_LOCKOUT_SECONDS - elapsed) + 1
+
+
 @app.post("/api/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
     """
     Verifies credentials and issues a JWT token.
     """
+    client = request.client.host if request.client else "unknown"
+    wait = _login_blocked(client)
+    if wait:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many failed attempts. Try again in {wait} seconds.",
+        )
+
     # Find user in DB
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
     
     # Check if user exists and password is correct
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
+        failures, first_at = _FAILED_LOGINS.get(client, (0, time.monotonic()))
+        _FAILED_LOGINS[client] = (failures + 1, first_at)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    _FAILED_LOGINS.pop(client, None)
         
     # Valid credentials! Create the token.
     access_token = auth.create_access_token(data={"sub": user.username})
