@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "portScanner",
+  "mainBinaryName": "portscanner",
+  "version": "1.1.0",
+  "identifier": "io.github.bibektripathy.portscanner",
+  "build": {
+    "frontendDist": "../../frontend/dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm --prefix ../frontend run dev",
+    "beforeBuildCommand": "npm --prefix ../frontend run build"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "portScanner — System Monitor",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 820,
+        "minHeight": 560,
+        "resizable": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "rpm", "appimage", "msi", "nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.ico"
+    ],
+    "externalBin": ["binaries/portscanner-backend"],
+    "shortDescription": "System monitor and port scanner",
+    "longDescription": "Monitor CPU, memory, disk, network, processes, Docker containers and listening ports — on this machine or on any server running the portScanner container.",
+    "category": "Utility",
+    "publisher": "Bibek Tripathy",
+    "homepage": "https://github.com/BibekTripathy/portScanner",
+    "linux": {
+      "deb": {
+        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]
+      }
+    }
+  }
+}

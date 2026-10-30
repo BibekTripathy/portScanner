@@ -1,5 +1,4 @@
 import docker
-from flask import current_app
 
 class DockerService:
     def __init__(self):

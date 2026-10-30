@@ -221,3 +221,14 @@ npm-debug.log
 yarn-error.log
 .DS_Store
 portscanner.db
+
+# The blanket `*.json` and `tests/` rules above exist to keep scan output and local
+# fixtures out of the repo, but these files are source and have to be committed.
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/tests/
+!desktop/package.json
+!desktop/package-lock.json
+!desktop/src-tauri/tauri.conf.json
+!desktop/src-tauri/capabilities/
+!desktop/src-tauri/capabilities/*.json

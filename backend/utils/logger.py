@@ -1,11 +1,10 @@
 import logging
-from pathlib import Path
 from logging.handlers import RotatingFileHandler
 import sys
 
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
-LOG_FILE = LOG_DIR / "portscanner.log"
+import settings
+
+LOG_FILE = settings.LOG_DIR / "portscanner.log"
 
 
 def setup_logger():

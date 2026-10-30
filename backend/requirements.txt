@@ -1,6 +1,10 @@
-rich
-psutil
-PyYAML
-flask
 fastapi
 uvicorn
+psutil
+PyYAML
+rich
+docker
+bcrypt
+PyJWT
+SQLAlchemy
+python-multipart

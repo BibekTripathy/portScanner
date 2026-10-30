@@ -6,12 +6,17 @@ import DockerStatus from '../components/DockerStatus';
 import { ArrowLeft } from 'lucide-react';
 import '../index.css';
 import { useTheme } from '../hooks/useTheme'; // ensure styles are applied if needed
+import TargetSwitcher from '../components/TargetSwitcher';
+import { useConnections } from '../hooks/useConnections';
 
 function Stats() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [pollingInterval, setPollingInterval] = useState(3000);
   const { darkMode, toggleTheme } = useTheme();
+  // `signature` changes when a different machine is selected; using it as a key below
+  // discards the previous machine's readings instead of blending them.
+  const { active, signature } = useConnections();
 
   return (
     <div className="min-h-screen p-4 md:p-8 transition-colors duration-300 bg-[#87CEEB] dark:bg-[#040d1a] text-black dark:text-white">
@@ -25,13 +30,17 @@ function Stats() {
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            System Monitor
-          </h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-200">
+              System Monitor
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{active?.label}</p>
+          </div>
         </div>
         
         {/* Controls */}
         <div className="flex items-center gap-3">
+          <TargetSwitcher />
           <div className="flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Auto-refresh:</span>
             <select
@@ -92,7 +101,7 @@ function Stats() {
       </nav>
 
       {/* Content */}
-      <main>
+      <main key={signature}>
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
