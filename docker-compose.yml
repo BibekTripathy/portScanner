@@ -1,6 +1,6 @@
 services:
   system-monitor:
-    image: ghcr.io/bibektripathy/portscanner:latest
+    image: ghcr.io/bibektripathy/unifiedsysmon:latest
     container_name: system-monitor
     restart: unless-stopped
     ports:

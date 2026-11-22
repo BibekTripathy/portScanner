@@ -43,7 +43,7 @@
     "longDescription": "Monitor CPU, memory, disk, network, processes, Docker containers and listening ports — on this machine or on any server running the portScanner container.",
     "category": "Utility",
     "publisher": "Bibek Tripathy",
-    "homepage": "https://github.com/BibekTripathy/portScanner",
+    "homepage": "https://github.com/BibekTripathy/unifiedSysMon",
     "linux": {
       "deb": {
         "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]

@@ -33,7 +33,7 @@ header, so one window covers your laptop and your boxes.
 ## 💻 Desktop app
 
 Grab the installer for your platform from the
-[latest release](https://github.com/BibekTripathy/portScanner/releases):
+[latest release](https://github.com/BibekTripathy/unifiedSysMon/releases):
 
 - **Linux** — `.deb`, `.rpm` or `.AppImage`
 - **Windows** — `.msi` or the `.exe` installer
@@ -70,7 +70,7 @@ Your database, generated signing key and logs live in:
 ```yaml
 services:
   system-monitor:
-    image: ghcr.io/bibektripathy/portscanner:latest
+    image: ghcr.io/bibektripathy/unifiedsysmon:latest
     container_name: system-monitor
     restart: unless-stopped
     ports:
