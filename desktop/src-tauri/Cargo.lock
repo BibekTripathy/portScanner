@@ -3996,7 +3996,7 @@ checksum = "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8"
 
 [[package]]
 name = "unifiedsysmon-desktop"
-version = "2.2.0"
+version = "2.2.1"
 dependencies = [
  "rand 0.9.5",
  "reqwest 0.12.28",
