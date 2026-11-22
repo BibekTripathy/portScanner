@@ -21,6 +21,7 @@ import os
 import socket
 import sys
 import threading
+import time
 import webbrowser
 
 
@@ -28,6 +29,37 @@ def _free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
         return sock.getsockname()[1]
+
+
+def _exit_with_parent(pid: int) -> None:
+    """
+    Stop when the desktop shell goes away, however it went.
+
+    The shell does kill its sidecar on exit, but a PyInstaller one-file binary is a
+    bootloader with the real server as its child, so that kill only reaches the
+    bootloader and the server is left running. A crashed or force-killed shell never
+    gets to kill anything at all. Watching the shell's PID covers every case.
+    """
+    import psutil
+
+    try:
+        parent = psutil.Process(pid)
+        # PIDs get reused, so pin the identity to the start time as well.
+        started = parent.create_time()
+    except psutil.Error:
+        os._exit(0)
+
+    def watch():
+        while True:
+            time.sleep(1)
+            try:
+                if parent.create_time() == started and parent.is_running():
+                    continue
+            except psutil.Error:
+                pass
+            os._exit(0)
+
+    threading.Thread(target=watch, name="parent-watch", daemon=True).start()
 
 
 def parse_args(argv=None):
@@ -38,6 +70,7 @@ def parse_args(argv=None):
     parser.add_argument("--local-token", default=None, help="shared secret accepted from loopback clients in desktop mode")
     parser.add_argument("--data-dir", default=None, help="where to keep the database, logs and signing key")
     parser.add_argument("--open", action="store_true", help="open the UI in the default browser once the server is up")
+    parser.add_argument("--parent-pid", type=int, default=None, help="exit as soon as this process is gone (set by the desktop shell)")
     return parser.parse_args(argv)
 
 
@@ -58,6 +91,9 @@ def main(argv=None) -> int:
     if port == 0:
         port = _free_port()
     os.environ["UNIFIEDSYSMON_PORT"] = str(port)
+
+    if args.parent_pid:
+        _exit_with_parent(args.parent_pid)
 
     # A frozen binary has no importable module path for its own directory, so make
     # `import settings` / `import main` work the same way they do from source.

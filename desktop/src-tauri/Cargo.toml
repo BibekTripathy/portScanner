@@ -1,6 +1,6 @@
 [package]
 name = "unifiedsysmon-desktop"
-version = "2.2.0"
+version = "2.2.1"
 description = "Unified system monitor and port scanner"
 authors = ["Bibek Tripathy"]
 edition = "2021"

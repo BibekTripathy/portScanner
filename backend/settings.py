@@ -22,9 +22,9 @@ import sys
 from pathlib import Path
 
 APP_NAME = "unifiedSysMon"
-# The app was called portScanner before 2.2.0; its data folder and env vars still work.
+# The app was called portScanner before 2.2.1; its data folder and env vars still work.
 LEGACY_APP_NAME = "portScanner"
-APP_VERSION = "2.2.0"
+APP_VERSION = "2.2.1"
 
 
 

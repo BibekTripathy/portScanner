@@ -180,6 +180,10 @@ fn main() {
                     &port.to_string(),
                     "--local-token",
                     &token,
+                    // Killing the sidecar on exit only reaches PyInstaller's bootloader,
+                    // so the backend also watches this PID and stops when it is gone.
+                    "--parent-pid",
+                    &std::process::id().to_string(),
                 ]);
 
             let (mut rx, child) = sidecar.spawn()?;
