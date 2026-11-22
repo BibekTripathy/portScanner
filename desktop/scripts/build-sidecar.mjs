@@ -2,7 +2,7 @@
  * Builds the Python backend into a single executable and drops it into
  * src-tauri/binaries/ under the name Tauri expects for a sidecar:
  *
- *     portscanner-backend-<rust target triple>[.exe]
+ *     unifiedsysmon-backend-<rust target triple>[.exe]
  *
  * Run it before `npm run build` (the release workflow does exactly this).
  * Requires `pyinstaller` and the backend requirements on the current PATH/venv.
@@ -39,7 +39,7 @@ const args = [
   '--onefile',
   '--noconfirm',
   '--clean',
-  '--name', 'portscanner-backend',
+  '--name', 'unifiedsysmon-backend',
   '--distpath', join(buildRoot, 'dist'),
   '--workpath', join(buildRoot, 'work'),
   '--specpath', buildRoot,
@@ -62,9 +62,9 @@ execSync(`pyinstaller ${args.map((a) => JSON.stringify(a)).join(' ')}`, {
   cwd: repo,
 });
 
-const built = join(buildRoot, 'dist', `portscanner-backend${exeSuffix}`);
+const built = join(buildRoot, 'dist', `unifiedsysmon-backend${exeSuffix}`);
 if (!existsSync(built)) throw new Error(`PyInstaller did not produce ${built}`);
 
-const target = join(outDir, `portscanner-backend-${triple}${exeSuffix}`);
+const target = join(outDir, `unifiedsysmon-backend-${triple}${exeSuffix}`);
 copyFileSync(built, target);
 console.log(`\nSidecar ready: ${target}`);

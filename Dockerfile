@@ -28,10 +28,10 @@ WORKDIR /app/backend
 
 # The database, generated JWT signing key and logs live here. Mount it as a volume to
 # keep your accounts across container upgrades (see docker-compose.yml).
-ENV PORTSCANNER_DATA_DIR=/data \
-    PORTSCANNER_MODE=server \
-    PORTSCANNER_HOST=0.0.0.0 \
-    PORTSCANNER_PORT=8000
+ENV UNIFIEDSYSMON_DATA_DIR=/data \
+    UNIFIEDSYSMON_MODE=server \
+    UNIFIEDSYSMON_HOST=0.0.0.0 \
+    UNIFIEDSYSMON_PORT=8000
 VOLUME ["/data"]
 
 EXPOSE 8000
@@ -39,5 +39,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/info', timeout=4).status==200 else 1)"
 
-# server.py honours PORTSCANNER_* and prints the resolved address on startup.
+# server.py honours UNIFIEDSYSMON_* and prints the resolved address on startup.
 CMD ["python", "server.py"]

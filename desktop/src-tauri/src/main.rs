@@ -5,7 +5,7 @@
 //!
 //! On startup it:
 //!   1. picks a free loopback port and generates a one-shot token,
-//!   2. spawns the bundled `portscanner-backend` sidecar bound to that port in
+//!   2. spawns the bundled `unifiedsysmon-backend` sidecar bound to that port in
 //!      `desktop` mode, so it trusts the token for loopback requests only,
 //!   3. hands the URL and token to the web UI through the `local_backend` command,
 //!      which is why the desktop app never asks you to log in to your own machine,
@@ -170,7 +170,7 @@ fn main() {
         .setup(move |app| {
             let sidecar = app
                 .shell()
-                .sidecar("portscanner-backend")?
+                .sidecar("unifiedsysmon-backend")?
                 .args([
                     "--mode",
                     "desktop",

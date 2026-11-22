@@ -221,6 +221,7 @@ npm-debug.log
 yarn-error.log
 .DS_Store
 portscanner.db
+unifiedsysmon.db
 
 # The blanket `*.json` and `tests/` rules above exist to keep scan output and local
 # fixtures out of the repo, but these files are source and have to be committed.

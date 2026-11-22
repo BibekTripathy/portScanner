@@ -219,7 +219,7 @@ function Servers() {
                 <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
                 <span>
                   Found <strong>{probe.hostname}</strong> — {probe.system} {probe.release},
-                  portScanner {probe.version}
+                  unifiedSysMon {probe.version}
                   {probe.docker_available ? ', Docker available' : ''}.
                 </span>
               </div>

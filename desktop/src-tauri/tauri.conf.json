@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "portScanner",
-  "mainBinaryName": "portscanner",
-  "version": "2.1.0",
-  "identifier": "io.github.bibektripathy.portscanner",
+  "productName": "unifiedSysMon",
+  "mainBinaryName": "unifiedsysmon",
+  "version": "2.2.0",
+  "identifier": "io.github.bibektripathy.unifiedsysmon",
   "build": {
     "frontendDist": "../../frontend/dist",
     "devUrl": "http://localhost:5173",
@@ -15,7 +15,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "portScanner — System Monitor",
+        "title": "unifiedSysMon — System Monitor",
         "width": 1280,
         "height": 840,
         "minWidth": 820,
@@ -38,9 +38,9 @@
       "icons/icon.png",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/portscanner-backend"],
+    "externalBin": ["binaries/unifiedsysmon-backend"],
     "shortDescription": "System monitor and port scanner",
-    "longDescription": "Monitor CPU, memory, disk, network, processes, Docker containers and listening ports — on this machine or on any server running the portScanner container.",
+    "longDescription": "Monitor CPU, memory, disk, network, processes, Docker containers and listening ports — on this machine or on any server running the unifiedSysMon container.",
     "category": "Utility",
     "publisher": "Bibek Tripathy",
     "homepage": "https://github.com/BibekTripathy/unifiedSysMon",

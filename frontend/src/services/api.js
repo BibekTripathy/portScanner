@@ -74,8 +74,9 @@ export const infoAPI = {
     });
 
     if (!ok) throw new Error(`${origin} answered with HTTP ${status}.`);
-    if (json?.data?.app !== 'portScanner') {
-      throw new Error(`${origin} is reachable but does not look like a portScanner server.`);
+    // 'portScanner' is what servers older than 2.2.0 report.
+    if (!['unifiedSysMon', 'portScanner'].includes(json?.data?.app)) {
+      throw new Error(`${origin} is reachable but does not look like a unifiedSysMon server.`);
     }
     return json.data;
   },

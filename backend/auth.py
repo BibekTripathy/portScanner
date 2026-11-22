@@ -38,7 +38,7 @@ def get_password_hash(password):
 
 
 # 2. JWT Configuration
-# The key lives in settings.py: it comes from PORTSCANNER_SECRET_KEY when deploying,
+# The key lives in settings.py: it comes from UNIFIEDSYSMON_SECRET_KEY when deploying,
 # and is otherwise generated once and stored in the per-user data directory. It is
 # never hardcoded here, because anyone holding it can forge tokens.
 SECRET_KEY = settings.SECRET_KEY

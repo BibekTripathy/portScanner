@@ -50,7 +50,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False)
 class LocalUser:
     """
     Stand-in identity for the desktop app. The Tauri shell starts the backend with a
-    random PORTSCANNER_LOCAL_TOKEN, which is accepted only on loopback connections --
+    random UNIFIEDSYSMON_LOCAL_TOKEN, which is accepted only on loopback connections --
     so the person sitting at the machine is not asked to register an account to look
     at their own system, while every remote deployment still requires a JWT login.
     """

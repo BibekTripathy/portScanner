@@ -21,33 +21,59 @@ import shutil
 import sys
 from pathlib import Path
 
-APP_NAME = "portScanner"
-APP_VERSION = "2.1.0"
+APP_NAME = "unifiedSysMon"
+# The app was called portScanner before 2.2.0; its data folder and env vars still work.
+LEGACY_APP_NAME = "portScanner"
+APP_VERSION = "2.2.0"
+
+
+
+def env(name: str, default: str | None = None) -> str | None:
+    """`UNIFIEDSYSMON_<name>`, falling back to the pre-rename `PORTSCANNER_<name>`."""
+    return os.environ.get(f"UNIFIEDSYSMON_{name}") or os.environ.get(f"PORTSCANNER_{name}") or default
+
 
 # `desktop` is only ever set by the Tauri shell; anything else defaults to server rules.
-MODE = os.environ.get("PORTSCANNER_MODE", "server").lower()
+MODE = env("MODE", "server").lower()
 IS_DESKTOP = MODE == "desktop"
 IS_FROZEN = getattr(sys, "frozen", False)
 
 
+def _data_root() -> Path:
+    if sys.platform == "win32":
+        return Path(os.environ.get("APPDATA") or os.path.expanduser("~\\AppData\\Roaming"))
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support"
+    return Path(os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share"))
+
+
 def _default_data_dir() -> Path:
     """Per-user writable location for the database, generated secret and logs."""
-    if sys.platform == "win32":
-        base = os.environ.get("APPDATA") or os.path.expanduser("~\\AppData\\Roaming")
-        return Path(base) / APP_NAME
-    if sys.platform == "darwin":
-        return Path.home() / "Library" / "Application Support" / APP_NAME
-    base = os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share")
-    return Path(base) / APP_NAME
+    current = _data_root() / APP_NAME
+    legacy = _data_root() / LEGACY_APP_NAME
+    # Move a pre-rename data folder over once, so accounts and the signing key survive.
+    if legacy.is_dir() and not current.exists():
+        try:
+            legacy.rename(current)
+        except OSError:
+            return legacy
+    return current
 
 
-DATA_DIR = Path(os.environ.get("PORTSCANNER_DATA_DIR") or _default_data_dir())
+DATA_DIR = Path(env("DATA_DIR") or _default_data_dir())
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_DIR = DATA_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-DB_PATH = DATA_DIR / "portscanner.db"
+DB_PATH = DATA_DIR / "unifiedsysmon.db"
+
+_pre_rename_db = DATA_DIR / "portscanner.db"
+if _pre_rename_db.is_file() and not DB_PATH.exists():
+    try:
+        _pre_rename_db.rename(DB_PATH)
+    except OSError:
+        DB_PATH = _pre_rename_db
 
 # Older versions kept the database next to the source tree. Carry it over once so
 # existing accounts survive the move to a proper per-user data directory.
@@ -64,7 +90,7 @@ def _load_secret_key() -> str:
     The JWT signing key. Supplied by the environment in a deployment, otherwise
     generated once and persisted with owner-only permissions.
     """
-    env_key = os.environ.get("PORTSCANNER_SECRET_KEY")
+    env_key = env("SECRET_KEY")
     if env_key:
         return env_key
 
@@ -88,10 +114,10 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # one week
 
 # Shared secret for the desktop shell. Only honoured for loopback requests.
-LOCAL_TOKEN = os.environ.get("PORTSCANNER_LOCAL_TOKEN") or None
+LOCAL_TOKEN = env("LOCAL_TOKEN")
 
-HOST = os.environ.get("PORTSCANNER_HOST", "127.0.0.1" if IS_DESKTOP else "0.0.0.0")
-PORT = int(os.environ.get("PORTSCANNER_PORT", "8000"))
+HOST = env("HOST", "127.0.0.1" if IS_DESKTOP else "0.0.0.0")
+PORT = int(env("PORT", "8000"))
 
 LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
 

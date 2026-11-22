@@ -49,7 +49,7 @@ paru -U ./packaging/aur/PKGBUILD      # or: cd packaging/aur && makepkg -si
 
 It pulls the `.deb` for the current `pkgver` from the GitHub release and needs
 only `webkit2gtk-4.1`, `gtk3` and `libsoup3` — no Rust, Node or Python
-toolchain. Uninstall with `paru -R portscanner-bin`.
+toolchain. Uninstall with `paru -R unifiedsysmon-bin`.
 
 The app is a [Tauri](https://tauri.app) shell that starts the Python backend as a
 bundled sidecar on a random loopback port, with a token generated at launch. Nothing
@@ -58,8 +58,8 @@ the window stops the backend.
 
 Your database, generated signing key and logs live in:
 
-- Linux: `~/.local/share/portScanner/`
-- Windows: `%APPDATA%\portScanner\`
+- Linux: `~/.local/share/unifiedSysMon/`
+- Windows: `%APPDATA%\unifiedSysMon\`
 
 > Some readings need privileges. Process names and executables for ports owned by
 > other users show as `access_denied` unless the app is run with elevated rights, and
@@ -79,8 +79,8 @@ services:
     privileged: true
     environment:
       # Optional, but recommended: otherwise a key is generated into the volume.
-      # PORTSCANNER_SECRET_KEY: "a-long-random-string"
-      PORTSCANNER_DATA_DIR: /data
+      # UNIFIEDSYSMON_SECRET_KEY: "a-long-random-string"
+      UNIFIEDSYSMON_DATA_DIR: /data
     volumes:
       - monitor-data:/data            # accounts + signing key; keep this
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -107,14 +107,14 @@ everyone at once. Rate-limit at the proxy instead if that matters to you.
 
 ### Headless binary
 
-For a server without Docker, download `portScanner-linux` (or `portScanner-windows.exe`)
+For a server without Docker, download `unifiedSysMon-linux` (or `unifiedSysMon-windows.exe`)
 from the release and run it:
 
 ```bash
-./portScanner-linux                 # http://0.0.0.0:8000
-./portScanner-linux --port 9000     # a different port
-./portScanner-linux --open          # and open a browser at it
-./portScanner-linux --help          # all flags
+./unifiedSysMon-linux                 # http://0.0.0.0:8000
+./unifiedSysMon-linux --port 9000     # a different port
+./unifiedSysMon-linux --open          # and open a browser at it
+./unifiedSysMon-linux --help          # all flags
 ```
 
 ### Configuration
@@ -123,10 +123,14 @@ Both the container and the binary read:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `PORTSCANNER_SECRET_KEY` | generated into the data dir | JWT signing key |
-| `PORTSCANNER_DATA_DIR` | per-user app data dir | database, key and logs |
-| `PORTSCANNER_HOST` | `0.0.0.0` | interface to bind |
-| `PORTSCANNER_PORT` | `8000` | port to bind |
+| `UNIFIEDSYSMON_SECRET_KEY` | generated into the data dir | JWT signing key |
+| `UNIFIEDSYSMON_DATA_DIR` | per-user app data dir | database, key and logs |
+| `UNIFIEDSYSMON_HOST` | `0.0.0.0` | interface to bind |
+| `UNIFIEDSYSMON_PORT` | `8000` | port to bind |
+
+The app was called portScanner before 2.2.0. The old `PORTSCANNER_*` names are still
+read, and an existing `portScanner` data folder is moved to the new location on first
+start, so accounts and the signing key carry over.
 
 ## 🛠️ Development
 

@@ -5,9 +5,9 @@
 #
 #   paru -U ./packaging/aur/PKGBUILD     # or, without paru: makepkg -si
 #
-pkgname=portscanner-bin
-_appname=portScanner
-pkgver=2.1.0
+pkgname=unifiedsysmon-bin
+_appname=unifiedSysMon
+pkgver=2.2.0
 pkgrel=1
 pkgdesc="System monitor and port scanner desktop app with multi-server support"
 arch=('x86_64')
@@ -15,12 +15,12 @@ url="https://github.com/BibekTripathy/unifiedSysMon"
 license=('GPL-3.0-or-later')
 depends=('webkit2gtk-4.1' 'gtk3' 'libsoup3')
 optdepends=('docker: container management')
-provides=('portscanner')
-conflicts=('portscanner')
+provides=('unifiedsysmon')
+conflicts=('unifiedsysmon')
 # The bundled backend is a PyInstaller one-file binary; stripping it breaks it.
 options=('!strip' '!debug')
 source=("${pkgname}-${pkgver}.deb::${url}/releases/download/v${pkgver}/${_appname}_${pkgver}_amd64.deb")
-sha256sums=('26f22bed004ee00c5eda0091a623aeba4dd05f29592f61ac67ecfaeb45e92e9b')
+sha256sums=('SKIP')
 
 package() {
   # dpkg has used gzip, xz and zstd for data.tar over the years; take whichever.

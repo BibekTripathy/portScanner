@@ -7,9 +7,9 @@ Flags are translated into the environment variables that settings.py reads, and 
 then is the FastAPI app imported -- settings.py resolves the data directory and the
 signing key at import time, so configuration has to be in place first.
 
-    portscanner-backend                          # serve on 0.0.0.0:8000, JWT login
-    portscanner-backend --port 8080 --open       # and open a browser at it
-    portscanner-backend --mode desktop --port 0 --local-token <tok>   # Tauri sidecar
+    unifiedsysmon-backend                          # serve on 0.0.0.0:8000, JWT login
+    unifiedsysmon-backend --port 8080 --open       # and open a browser at it
+    unifiedsysmon-backend --mode desktop --port 0 --local-token <tok>   # Tauri sidecar
 
 With `--port 0` a free port is chosen by the OS and reported on stdout, which is how
 the desktop shell learns where to point the window.
@@ -31,7 +31,7 @@ def _free_port() -> int:
 
 
 def parse_args(argv=None):
-    parser = argparse.ArgumentParser(prog="portscanner-backend", description="Unified system monitor backend")
+    parser = argparse.ArgumentParser(prog="unifiedsysmon-backend", description="Unified system monitor backend")
     parser.add_argument("--host", default=None, help="interface to bind (default: 127.0.0.1 in desktop mode, 0.0.0.0 otherwise)")
     parser.add_argument("--port", type=int, default=None, help="port to bind, or 0 to pick a free one")
     parser.add_argument("--mode", choices=["server", "desktop"], default=None, help="desktop mode trusts --local-token on loopback")
@@ -46,18 +46,18 @@ def main(argv=None) -> int:
 
     # Populate the environment before settings.py (and therefore the app) is imported.
     if args.mode:
-        os.environ["PORTSCANNER_MODE"] = args.mode
+        os.environ["UNIFIEDSYSMON_MODE"] = args.mode
     if args.local_token:
-        os.environ["PORTSCANNER_LOCAL_TOKEN"] = args.local_token
+        os.environ["UNIFIEDSYSMON_LOCAL_TOKEN"] = args.local_token
     if args.data_dir:
-        os.environ["PORTSCANNER_DATA_DIR"] = args.data_dir
+        os.environ["UNIFIEDSYSMON_DATA_DIR"] = args.data_dir
     if args.host:
-        os.environ["PORTSCANNER_HOST"] = args.host
+        os.environ["UNIFIEDSYSMON_HOST"] = args.host
 
-    port = args.port if args.port is not None else int(os.environ.get("PORTSCANNER_PORT", "8000"))
+    port = args.port if args.port is not None else int(os.environ.get("UNIFIEDSYSMON_PORT") or os.environ.get("PORTSCANNER_PORT") or "8000")
     if port == 0:
         port = _free_port()
-    os.environ["PORTSCANNER_PORT"] = str(port)
+    os.environ["UNIFIEDSYSMON_PORT"] = str(port)
 
     # A frozen binary has no importable module path for its own directory, so make
     # `import settings` / `import main` work the same way they do from source.

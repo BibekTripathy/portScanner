@@ -11,8 +11,8 @@ services:
     environment:
       # Set this to a long random string. If you leave it out, a key is generated into
       # the /data volume on first run, which is fine as long as that volume persists.
-      # PORTSCANNER_SECRET_KEY: "change-me"
-      PORTSCANNER_DATA_DIR: /data
+      # UNIFIEDSYSMON_SECRET_KEY: "change-me"
+      UNIFIEDSYSMON_DATA_DIR: /data
     volumes:
       # Accounts, signing key and logs. Keep this, or everyone has to register again.
       - monitor-data:/data

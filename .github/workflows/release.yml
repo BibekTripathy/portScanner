@@ -104,10 +104,10 @@ jobs:
         include:
           - os: ubuntu-22.04
             label: linux
-            artifact: portScanner-linux
+            artifact: unifiedSysMon-linux
           - os: windows-latest
             label: windows
-            artifact: portScanner-windows.exe
+            artifact: unifiedSysMon-windows.exe
 
     steps:
       - uses: actions/checkout@v4
@@ -131,11 +131,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt pyinstaller
 
-      # One file that serves both the API and the UI: `./portScanner-linux --open`
+      # One file that serves both the API and the UI: `./unifiedSysMon-linux --open`
       - name: Build binary (Linux)
         if: matrix.label == 'linux'
         run: |
-          pyinstaller --onefile --name portScanner-linux \
+          pyinstaller --onefile --name unifiedSysMon-linux \
             --add-data "frontend/dist:frontend/dist" \
             --add-data "backend/config/criticalPorts.yaml:backend/config" \
             --hidden-import uvicorn.logging \
@@ -149,7 +149,7 @@ jobs:
       - name: Build binary (Windows)
         if: matrix.label == 'windows'
         run: |
-          pyinstaller --onefile --name portScanner-windows `
+          pyinstaller --onefile --name unifiedSysMon-windows `
             --add-data "frontend/dist;frontend/dist" `
             --add-data "backend/config/criticalPorts.yaml;backend/config" `
             --hidden-import uvicorn.logging `

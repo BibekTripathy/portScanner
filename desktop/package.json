@@ -1,5 +1,5 @@
 {
-  "name": "portscanner-desktop",
+  "name": "unifiedsysmon-desktop",
   "private": true,
   "version": "0.3.0",
   "description": "Tauri shell that runs the monitor backend locally on Linux and Windows",

@@ -4,7 +4,7 @@ import sys
 
 import settings
 
-LOG_FILE = settings.LOG_DIR / "portscanner.log"
+LOG_FILE = settings.LOG_DIR / "unifiedsysmon.log"
 
 
 def setup_logger():
