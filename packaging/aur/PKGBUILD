@@ -20,7 +20,7 @@ conflicts=('portscanner')
 # The bundled backend is a PyInstaller one-file binary; stripping it breaks it.
 options=('!strip' '!debug')
 source=("${pkgname}-${pkgver}.deb::${url}/releases/download/v${pkgver}/${_appname}_${pkgver}_amd64.deb")
-sha256sums=('SKIP')
+sha256sums=('26f22bed004ee00c5eda0091a623aeba4dd05f29592f61ac67ecfaeb45e92e9b')
 
 package() {
   # dpkg has used gzip, xz and zstd for data.tar over the years; take whichever.
